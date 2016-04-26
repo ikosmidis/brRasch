@@ -1,6 +1,6 @@
 # brRasch
 
-# Installation
+## Installation
 
 Install the development version from github:
 
