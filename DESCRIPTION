@@ -1,0 +1,21 @@
+Package: brRasch
+Title: Maximum likelihood and bias reduction for fixed-effets Rasch models
+Version: 0.1.1.9000
+Authors@R: person("Ioannis", "Kosmidis", email = "i.kosmidis@ucl.ac.uk",
+  role = c("aut", "cre"))
+Description: Fit fixed-effects multidimensional Rasch models using either
+    maximum lieklihood or bias reduction
+License: GPL (>= 2)
+LazyData: true
+Suggests:
+    knitr,
+    testthat
+VignetteBuilder: knitr
+Imports:
+    ggplot2,
+    brglm,
+    relimp,
+    gnm
+Depends:
+    Matrix
+RoxygenNote: 5.0.1
