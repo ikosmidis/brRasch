@@ -7,7 +7,4 @@
 \usage{
 \method{plot}{brRasch}(x, lab = "ability", col = "black", ...)
 }
-\description{
-adfssfafasdf
-}
 

@@ -11,7 +11,7 @@ brRasch(data, weights, itemsName = "item", subjectsName = "subject",
   penalty = c("none", "L2", "L2discr"), tuning = 0)
 }
 \arguments{
-\item{data}{a matrix of Binomial counts with the rows corresponding to subjects and columns to items or an object of class \link{compressed}}
+\item{data}{a matrix of counts or an object of class \link{compressed}. If a matrix of counts is inputted then the rows must correspond to subjects and the columns to items.}
 
 \item{weights}{a matrix of weights. If left unspecfied then it is assummed to be a matrix of 1 of the same dimension as data. If \code{data} is an object of class \link{compressed} then the value of \code{weights} will be ignored}
 

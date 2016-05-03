@@ -29,6 +29,7 @@
   }
   \subsection{LOW PRIORITY}{
     \itemize{
+      \item Features: Add facilities to reshape from a subject-item  arrangement to a data frame ready for glm or gnm and back
       \item Features: Add facilities to move between scaled constrasts
       \item Features: Add item-response surfaces
       \item Features: Add chi-squared/likelihood ratio test facilities

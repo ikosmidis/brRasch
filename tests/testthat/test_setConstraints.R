@@ -24,3 +24,7 @@ constr <- setConstraintsRasch(data = TestData,
 test_that("setConstraintsRasch returns the requested constraints", {
     expect_equal(constr$constrainTo, c(betasTest[c(1:2, 9:10)], gammasTest[1:2]))
 })
+
+
+constr1 <- setConstraints(parnames = letters[1:24],
+                          which = c(2, 6))

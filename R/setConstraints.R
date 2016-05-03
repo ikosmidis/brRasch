@@ -1,13 +1,28 @@
 ## Author: Ioannis Kosmidis
 ## Date: 08/03/2015
 ## Licence: GPL 2 or greater
-
-
+#' @title Set and check identifiability constraints for the parameters of a model
+#'
+#' @description 'setConstraints' is a helper function that acts as a simple interface to set constraints for some of the parameters of a model.
+#'
+#' @param nconstraints positive integer. It indicates the smallest number of constraints required for indefiability
+#' @param parnames the names of the model parameters
+#' @param which a vector of integers indicating which parameters are to be constrained
+#' @param values a vector with elements the values at which the parameters in \code{which} should be constrained
+#'
+#' @details
+#' @export
 setConstraints <- function(nconstraints,
                            parnames,
                            which,
                            values) {
     ## Simple checks on the number of constraints.
+    if (missing(nconstraints)) {
+        stop("nconstraints is missing with no default")
+    }
+    if (missing(parnames)) {
+        stop("parnames is missing with no default")
+    }
     checknumber <- function(constrained) {
         imposedConstaints <- sum(constrained)
         if (imposedConstaints == nconstraints) return(NULL)
@@ -48,6 +63,26 @@ setConstraints <- function(nconstraints,
 }
 
 
+#' @title Set and check constraints for the parameters of IRT models
+#'
+#' @description 'setConstraintsRasch' is used to set constraints on the parameters for fixed-effects IRT models.
+#'
+#' @param data a matrix of counts or an object of class \link{compressed}. If a matrix of counts is inputted then the rows must correspond to subjects and the columns to items.
+#' @param dim non-negative integer. It specifies the dimension of the Rasch model. See Details in \link{brRasch} for more information
+#' @param which a vector of integers indicating which parameters are to be constrained
+#' @param values a vector with elements the values at which the parameters in \code{which} should be constrained
+#'
+#'
+#' @details
+#'
+#' @return
+#' \code{setConstraintsRasch} returns an object of class \link{setConstraints}, which is a list with the following components:
+#' \item{constrained}{a logical vector of the same length as the number of parameters in the model}
+#' \item{constrainedTo}{a numeric vector with the values of the constrained parameters, in the same order they appear in \code{constrained}}
+#' \item{dim}{the \code{dim} used}
+#'
+#' @example man/lsat_setConstraints.R
+#'
 #' @export
 setConstraintsRasch <- function(data, dim, which, values) {
     S <- nrow(data)

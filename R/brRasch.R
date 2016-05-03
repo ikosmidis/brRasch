@@ -6,7 +6,7 @@
 #'
 #' @description 'brRasch' is used to fit fixed-effects IRT models by inputting the data in a matrix format and specifying the constraints.
 #'
-#' @param data a matrix of Binomial counts with the rows corresponding to subjects and columns to items or an object of class \link{compressed}
+#' @param data a matrix of counts or an object of class \link{compressed}. If a matrix of counts is inputted then the rows must correspond to subjects and the columns to items.
 #' @param weights a matrix of weights. If left unspecfied then it is assummed to be a matrix of 1 of the same dimension as data. If \code{data} is an object of class \link{compressed} then the value of \code{weights} will be ignored
 #' @param itemsName character string specifying the prefix to be used on the column index of data. It is used to specify meanigful names for the model parameters and applied only when colnames(data) is \code{NULL}
 #' @param subjectsName character string specifying the prefix to be used on the row index of data. It is used to specify meanigful names for the model parameters and applied only when rownames(data) is \code{NULL}
