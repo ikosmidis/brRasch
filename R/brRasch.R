@@ -27,7 +27,7 @@
 #'
 #' @details
 #'
-#'
+#' If \code{dim = 0} then an 1PL model is fit. Any input in \code{constraints} is ignored and the constraints are set internally for a 2PL model by fixing the 'first' easiness parameter to \code{0} and all discrimination parameters to \code{1}.
 #'
 #' @return coefficients
 #'
@@ -52,6 +52,7 @@ brRasch <- function(data,
                     trace = FALSE,
                     start = NULL,
                     constraints,
+                    fix = FALSE,
                     penalty = c("none", "L2", "L2discr"),
                     tuning = 0) {
 
@@ -121,7 +122,6 @@ brRasch <- function(data,
         }
         with(fit, {
             epsilon <- data - weights*probs
-
             gradVec <- c(colSums(epsilon),
                          gammas %*% epsilon,
                          tcrossprod(betas, epsilon))
@@ -147,7 +147,7 @@ brRasch <- function(data,
                 Vsqrts <- Matrix::Diagonal(I)*Vsqrt[s, ]
                 gammass <- gammas[,s]
                 ele <- Matrix::Matrix(unitvector(S, s), ncol = 1)
-                fisherSqrt <- Matrix::rBind(Vsqrts,
+                fisherSqrt <- Matrix::rbind(Vsqrts,
                                             Matrix::kronecker(Vsqrts, gammass),
                                             Matrix::kronecker(ele, betas %*% Vsqrts))
                 fisherInfo <- fisherInfo + Matrix::tcrossprod(fisherSqrt)
@@ -208,7 +208,7 @@ brRasch <- function(data,
                 Da <- Matrix::Matrix(0, nrow = I, ncol = S)
                 Da[i, ] <- Vsqrti
                 ele <- Matrix::Matrix(unitvector(I, i), ncol = 1)
-                fisherSqrt <- Matrix::rBind(Da,
+                fisherSqrt <- Matrix::rbind(Da,
                                             Matrix::kronecker(ele, gammas %*% dVsqrti),
                                             Matrix::kronecker(dVsqrti, betasi))
                 fisherInfo <- fisherInfo + Matrix::tcrossprod(fisherSqrt)
@@ -265,11 +265,11 @@ brRasch <- function(data,
                 Da <- Matrix::Matrix(0, nrow = I, ncol = S)
                 Da[i, ] <- 1
                 ele <- Matrix::Matrix(unitvector(I, i), ncol = 1)
-                X[[i]] <- Matrix::t(rBind(Da,
+                X[[i]] <- Matrix::t(rbind(Da,
                                           Matrix::kronecker(ele, gammas),
                                           Matrix::kronecker(Diagonal(S), betasi)))
             }
-            do.call("rBind", X)[, !constrained]
+            do.call("rbind", X)[, !constrained]
         })
     }
 
@@ -296,11 +296,11 @@ brRasch <- function(data,
         vcovExt[!constrained, !constrained] <- vcov
         hatv <- hats(par, fit = fit, vcov = vcov, constrained = constrained)
         jac <- predictorJacobian(par, fit = fit, constrained = constrained)
-            with(fit, {
-                vcovBlock <- vcovExt[b1, b2]
-                cs <- c(tapply(vcovBlock[i1], i2, sum))
-                Matrix::drop(c(cs*weights*probs*(1 - probs) + 0.5*hatv*(1 - 2*probs))%*%jac)
-            })
+        with(fit, {
+            vcovBlock <- vcovExt[b1, b2]
+            cs <- c(tapply(vcovBlock[i1], i2, sum))
+            Matrix::drop(c(cs*weights*probs*(1 - probs) + 0.5*hatv*(1 - 2*probs))%*%jac)
+        })
     }
 
     ###############################################################
@@ -607,7 +607,6 @@ brRasch <- function(data,
     else {
         converged <- TRUE
     }
-
 
 
 

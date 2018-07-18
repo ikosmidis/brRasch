@@ -85,6 +85,9 @@ setConstraints <- function(nconstraints,
 #'
 #' @export
 setConstraintsRasch <- function(data, dim, which, values) {
+    if (dim < 1) {
+        stop("dim must be a positive integer")
+    }
     S <- nrow(data)
     I <- ncol(data)
     subjectsNames <- rownames(data)
@@ -99,6 +102,7 @@ setConstraintsRasch <- function(data, dim, which, values) {
     parnames <- c(itemsNames,
                   apply(expand.grid(paste0("(dim", seq.int(dim), ")"), itemsNames)[, 2:1], 1, paste0, collapse = ""),
                   apply(expand.grid(paste0("(dim", seq.int(dim), ")"), subjectsNames)[, 2:1], 1, paste0, collapse = ""))
+
     nconstraints <- dim*(dim + 1)
     if (missing(which) | missing(values)) {
         out <- setConstraints(nconstraints = nconstraints, parnames = parnames)

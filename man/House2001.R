@@ -20,6 +20,21 @@ constr <- setConstraintsRasch(House2001m, dim = 1, which = c(1, 21), values = c(
 
 fitBRHouse2001 <- brRasch(House2001m, constraints = constr, br = TRUE, dim = 1, trace = 1)
 
+## Check solution against brglm2
+House_1PL <- brRasch(House2001m, br = TRUE, dim = 0, trace = 1)
+aa <- stack(as.data.frame(House2001m))
+names(aa) <- c("response", "rollcall")
+aa$member <- rownames(House2001m)
+library(brglm2)
+House_1PLbrglm2 <- glm(response ~ -1 + member + rollcall, data = aa, family = binomial(logit),
+                       method = "brglm_fit", trace = TRUE)
+## Compare. All good
+all.equal(c(0, coef(House_1PLbrglm2)[435 + 1:19]), coef(House_1PL, what = "easiness"), tolerance = 1e-04,
+          check.attributes = FALSE)
+all.equal(coef(House_1PLbrglm2)[1:435], coef(House_1PL, what = "ability"), tolerance = 1e-04,
+          check.attributes = FALSE)
+
+
 ## Get US party colours for each member
 ## Colours selected using http://colorbrewer2.org
 partyColors <- ifelse(House2001$party[informative] == "D", "#67a9cf", "#ef8a62")
