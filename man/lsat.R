@@ -87,11 +87,32 @@ constr <- setConstraintsRasch(data = LSATdecompressed,
                               values = c(0, 1))
 
 # Requires several slow iterations
-fitBR1 <- brRasch(LSATdecompressed, constraints = constr, br = TRUE,
-                  start = startBR, trace = 1)
+fitBR1 <- brRasch(LSATdecompressed, constraints = constr, br = TRUE, dim = 1,
+                  start = startBR, trace = 1, fstol = 1e-06)
+
 
 # Plot the IRFs
-irf(fitBR1)
+    irf(fitBR1)
+
+
+    ## Score test 2PL vs 1PL
+    fitBR0 <- brRasch(LSATdecompressed, dim = 0, br = TRUE,
+                      start = coef(fitBR2), trace = 1, fstol = 1e-06)
+
+constr_score <- setConstraintsRasch(data = LSATdecompressed,
+                                     dim = 1,
+                                     which = c(1, 6, 7, 8, 9, 10),
+                                     values = c(0, 1, 1, 1, 1, 1),
+                                     restricted = c(7, 8, 9, 10))
+fitBR0_restr <- brRasch(LSATdecompressed, constraints = constr_score, br = TRUE,
+                  trace = 1, dim = 1, fstol = 1e-06)
+## p-value for test that all betas are 1 is large
+    wh <- names(coef(fitBR0_restr))[c(7, 8, 9, 10)]
+1 - pchisq(with(fitBR0_restr, drop(scores[wh] %*% vcov[wh, wh] %*% scores[wh])), 4)
+    ## which is compatible with the comparable value that the discrimination parameters have
+coef(fitBR1, what = "discr")
+
+
 }
 
 \dontrun{
@@ -99,7 +120,6 @@ irf(fitBR1)
 fitBR2 <- brRasch(LSAT, constraints = constr, br = TRUE,
                   trace = 1)
 }
-
 
 \dontrun{
 

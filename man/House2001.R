@@ -35,6 +35,15 @@ all.equal(coef(House_1PLbrglm2)[1:435], coef(House_1PL, what = "ability"), toler
           check.attributes = FALSE)
 
 
+## score test
+constr_score <- setConstraintsRasch(House2001m, dim = 1, which = c(1, 21:40),
+                                    values = c(0, rep(1, 20)),
+                                    restricted = c(22:40))
+House_1PL_restr <- brRasch(House2001m, br = TRUE, dim = 1, constraints = constr_score, trace = 1,
+                           start = coef(House_1PL))
+wh <- names(coef(House_1PL_restr))[22:40]
+1 - pchisq(drop(with(House_1PL_restr, scores[wh] %*% vcov[wh, wh] %*% scores[wh])), 19)
+
 ## Get US party colours for each member
 ## Colours selected using http://colorbrewer2.org
 partyColors <- ifelse(House2001$party[informative] == "D", "#67a9cf", "#ef8a62")

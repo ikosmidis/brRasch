@@ -84,7 +84,7 @@ setConstraints <- function(nconstraints,
 #' @example man/lsat_setConstraints.R
 #'
 #' @export
-setConstraintsRasch <- function(data, dim, which, values) {
+setConstraintsRasch <- function(data, dim, which, values, restricted) {
     if (dim < 1) {
         stop("dim must be a positive integer")
     }
@@ -109,6 +109,19 @@ setConstraintsRasch <- function(data, dim, which, values) {
     }
     else {
         out <- setConstraints(nconstraints = nconstraints, parnames = parnames, which = which, values = values)
+    }
+    nvar <- length(out$constrained)
+    if (missing(restricted)) {
+        out$restricted <- rep(FALSE, nvar)
+    }
+    else {
+        if (!(restricted %in% which)) {
+            stop("`restricted` is not a subset of `which`")
+        }
+        else {
+            out$restricted <- rep(FALSE, nvar)
+            out$restricted[restricted] <- TRUE
+        }
     }
     out$dim <- dim
     out

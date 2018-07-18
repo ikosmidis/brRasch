@@ -116,16 +116,23 @@ brRasch <- function(data,
         })
     }
 
-    gradfun <- function(pars, fit = NULL, constrained = rep(FALSE, npar), ...) {
+    gradfun <- function(pars, fit = NULL, constrained = rep(FALSE, npar),
+                        restricted = rep(FALSE, npar), all = FALSE, ...) {
         if (is.null(fit)) {
             fit <- fitfun(pars, ...)
+        }
+        if (all) {
+            inds <- !xor(constrained, restricted)
+        }
+        else {
+            inds <- !constrained
         }
         with(fit, {
             epsilon <- data - weights*probs
             gradVec <- c(colSums(epsilon),
                          gammas %*% epsilon,
                          tcrossprod(betas, epsilon))
-            (gradVec + penobj$gradfun)[!constrained]
+            (gradVec + penobj$gradfun)[inds]
         })
     }
 
@@ -135,6 +142,7 @@ brRasch <- function(data,
     hessfunSubjects_sparse <- function(pars, fit = NULL,
                                        inverse = FALSE,
                                        constrained = rep(FALSE, npar),
+                                       restricted = rep(FALSE, npar),
                                        ridge = 0,
                                 ...) {
         if (is.null(fit)) {
@@ -152,8 +160,9 @@ brRasch <- function(data,
                                             Matrix::kronecker(ele, betas %*% Vsqrts))
                 fisherInfo <- fisherInfo + Matrix::tcrossprod(fisherSqrt)
             }
-            fisherInfo <- (fisherInfo + penobj$hessfun)[!constrained, !constrained]
-            if (inverse) solve(fisherInfo + ridge*Matrix::Diagonal(enpar)) else fisherInfo
+            inds <- !xor(constrained, restricted)
+            fisherInfo <- (fisherInfo + penobj$hessfun)[inds, inds]
+            if (inverse) solve(fisherInfo + ridge*Matrix::Diagonal(enpar + sum(restricted))) else fisherInfo
         })
     }
 
@@ -164,6 +173,7 @@ brRasch <- function(data,
     hessfunSubjects_dense <- function(pars, fit = NULL,
                                       inverse = FALSE,
                                       constrained = rep(FALSE, npar),
+                                      restricted = rep(FALSE, npar),
                                       ridge = 0,
                                 ...) {
         if (is.null(fit)) {
@@ -181,8 +191,9 @@ brRasch <- function(data,
                                     kronecker(ele, betas %*% Vsqrts))
                 fisherInfo <- fisherInfo + tcrossprod(fisherSqrt)
             }
-            fisherInfo <- (fisherInfo + penobj$hessfun)[!constrained, !constrained]
-            if (inverse) solve(fisherInfo + ridge*diag(enpar)) else fisherInfo
+            inds <- !xor(constrained, restricted)
+            fisherInfo <- (fisherInfo + penobj$hessfun)[inds, inds]
+            if (inverse) solve(fisherInfo + ridge*diag(enpar + sum(restricted))) else fisherInfo
         })
     }
 
@@ -193,6 +204,7 @@ brRasch <- function(data,
     hessfunItems_sparse <- function(pars, fit = NULL,
                                     inverse = FALSE,
                                     constrained = rep(FALSE, npar),
+                                    restricted = rep(FALSE, npar),
                                     ridge = 0,
                                     ...) {
         if (is.null(fit)) {
@@ -213,8 +225,9 @@ brRasch <- function(data,
                                             Matrix::kronecker(dVsqrti, betasi))
                 fisherInfo <- fisherInfo + Matrix::tcrossprod(fisherSqrt)
             }
-            fisherInfo <- (fisherInfo + penobj$hessfun)[!constrained, !constrained]
-            if (inverse) solve(fisherInfo + ridge*Matrix::Diagonal(enpar)) else fisherInfo
+            inds <- !xor(constrained, restricted)
+            fisherInfo <- (fisherInfo + penobj$hessfun)[inds, inds]
+            if (inverse) solve(fisherInfo + ridge*Matrix::Diagonal(enpar + sum(restricted))) else fisherInfo
         })
     }
 
@@ -225,6 +238,7 @@ brRasch <- function(data,
     hessfunItems_dense <- function(pars, fit = NULL,
                                    inverse = FALSE,
                                    constrained = rep(FALSE, npar),
+                                   restricted = rep(FALSE, npar),
                                    ridge = 0,
                              ...) {
         if (is.null(fit)) {
@@ -245,8 +259,9 @@ brRasch <- function(data,
                                     kronecker(dVsqrti, betasi))
                 fisherInfo <- fisherInfo + tcrossprod(fisherSqrt)
             }
-            fisherInfo <- (fisherInfo + penobj$hessfun)[!constrained, !constrained]
-            if (inverse) solve(fisherInfo + ridge*diag(enpar)) else fisherInfo
+            inds <- !xor(constrained, restricted)
+            fisherInfo <- (fisherInfo + penobj$hessfun)[inds, inds]
+            if (inverse) solve(fisherInfo + ridge*diag(enpar + sum(restricted))) else fisherInfo
         })
     }
 
@@ -254,7 +269,8 @@ brRasch <- function(data,
     ## There is definitely a better way for predictorJacobian (avoid
     ## transposal), hatvalues (exploit sparseness), bias (avoid index
     ## games)
-    predictorJacobian <- function(pars, fit = NULL, constrained = rep(FALSE, npar), ...) {
+    predictorJacobian <- function(pars, fit = NULL, constrained = rep(FALSE, npar),
+                                  restricted = rep(FALSE, npar), ...) {
         if (is.null(fit)) {
             fit <- fitfun(pars, ...)
         }
@@ -269,23 +285,26 @@ brRasch <- function(data,
                                           Matrix::kronecker(ele, gammas),
                                           Matrix::kronecker(Diagonal(S), betasi)))
             }
-            do.call("rbind", X)[, !constrained]
+            inds <- !xor(constrained, restricted)
+            do.call("rbind", X)[, inds]
         })
     }
 
-    hats <- function(pars, fit = NULL, vcov, constrained = rep(FALSE, npar), ...) {
+    hats <- function(pars, fit = NULL, vcov, constrained = rep(FALSE, npar),
+                     restricted = rep(FALSE, npar), ...) {
         if (is.null(fit)) {
             fit <- fitfun(pars, ...)
         }
         with(fit, {
             V <- as.vector(weights*probs*(1 - probs))
-            Xmat <- predictorJacobian(pars, fit = fit, constrained = constrained)
+            Xmat <- predictorJacobian(pars, fit = fit, constrained = constrained, restricted = restricted)
             Matrix::rowSums((Xmat %*% vcov) * Xmat) * V
         })
     }
 
     ## The first-order bias function
-    adjustmentfun <- function(pars, fit = NULL, vcov, constrained = rep(FALSE, npar), ...) {
+    adjustmentfun <- function(pars, fit = NULL, vcov, constrained = rep(FALSE, npar),
+                              restricted = rep(FALSE, npar), all = FALSE, ...) {
         if (is.null(fit)) {
             fit <- fitfun(pars, ...)
         }
@@ -293,9 +312,15 @@ brRasch <- function(data,
         ## This fails with error
         ## Error in vcovExt[!constrained, !constrained] <- vcov (from brRasch.R#296) :
         ##  number of items to replace is not a multiple of replacement length
-        vcovExt[!constrained, !constrained] <- vcov
-        hatv <- hats(par, fit = fit, vcov = vcov, constrained = constrained)
-        jac <- predictorJacobian(par, fit = fit, constrained = constrained)
+        inds <- !xor(constrained, restricted)
+        vcovExt[inds, inds] <- vcov
+        hatv <- hats(par, fit = fit, vcov = vcov, constrained = constrained, restricted = restricted)
+        if (all) {
+            jac <- predictorJacobian(par, fit = fit, constrained = constrained, restricted = restricted)
+        }
+        else {
+            jac <- predictorJacobian(par, fit = fit, constrained = constrained)
+        }
         with(fit, {
             vcovBlock <- vcovExt[b1, b2]
             cs <- c(tapply(vcovBlock[i1], i2, sum))
@@ -406,6 +431,7 @@ brRasch <- function(data,
         }
     }
     constrained <- constraints$constrained
+    restricted <- constraints$restricted
 
     ## check if dim in the setConstraints object matched the requested
     ## dim (that is the setConstraints object supplied was aimed for
@@ -515,7 +541,6 @@ brRasch <- function(data,
                 fsridgeC <- fsridge
             }
 
-
             testhalf <- TRUE
 
             steps <- rep(NA_real_, 15)
@@ -532,12 +557,13 @@ brRasch <- function(data,
 
                 ## }
 
-                scores <- gradfun(par, fit = fit, constrained = constrained)
+                scores <- gradfun(par, fit = fit, constrained = constrained, restricted = restricted)
 
                 hessInv <- try(hessfun(par,
                                        fit = fit,
                                        inverse = TRUE,
                                        constrained = constrained,
+                                       ## no restricted for this one
                                        ridge = fsridgeC))
 
 
@@ -552,12 +578,15 @@ brRasch <- function(data,
                 ## in order to use it for the calculation of the
                 ## adjustment
                 if (br) {
-                    vcov <- try(hessfun(par, fit = fit, constrained = constrained, inverse = TRUE, ridge = 0), silent = TRUE)
+                    vcov <- try(hessfun(par, fit = fit,
+                                        constrained = constrained, restricted = restricted,
+                                        inverse = TRUE, ridge = 0), silent = TRUE)
                     if (inherits(vcov, "try-error")) {
                         adjustment <- rep.int(NA_real_, npar)[!constrained]
                     }
                     else {
-                        adjustment <- adjustmentfun(par, fit = fit, vcov = vcov, constrained = constrained)
+                        adjustment <- adjustmentfun(par, fit = fit, vcov = vcov, constrained = constrained,
+                                                    restricted = restricted)
                     }
                 }
                 else {
@@ -568,6 +597,7 @@ brRasch <- function(data,
                 ## adjustment was possible and if not break
                 if (failedAdj <- any(is.na(adjustment))) {
                     warning("failed to calculate the bias-reducing score adjustment: iteration stopped prematurely")
+
                     break
                 }
 
@@ -613,24 +643,24 @@ brRasch <- function(data,
     ## Get quantities for the fitted model
     fit <- fitfun(par)
 
-
-    score <- gradfun(par, fit = fit, constrained = constrained)
-    vcov <- try(hessfun(par, fit = fit, constrained = constrained, inverse = TRUE, ridge = 0), silent = TRUE)
+    inds <- !xor(constrained, restricted)
+    score <- gradfun(par, fit = fit, constrained = constrained, restricted = restricted, all = TRUE)
+    vcov <- try(hessfun(par, fit = fit, constrained = constrained, restricted = restricted,
+                        inverse = TRUE, ridge = 0), silent = TRUE)
     if (inherits(vcov, "try-error")) {
-        vcov <- array(NA_real_, dim = c(npar, npar))[!constrained, !constrained]
+        vcov <- array(NA_real_, dim = c(npar, npar))[inds, inds]
         if (br) {
-            score <- rep.int(NA_real_, npar)[!constrained]
+            score <- rep.int(NA_real_, npar)[inds]
         }
     }
     else {
         if (br) {
-            score <- score + adjustmentfun(par, fit = fit, vcov = vcov, constrained = constrained)
+            score <- score + adjustmentfun(par, fit = fit, vcov = vcov, constrained = constrained, restricted = restricted, all = TRUE)
         }
     }
 
 
-    rownames(vcov) <- colnames(vcov) <- parnames[!constrained]
-    names(score) <- parnames[!constrained]
+    rownames(vcov) <- colnames(vcov) <- names(score) <- parnames[inds]
 
 
     out <- list(loglik = loglik(par),
