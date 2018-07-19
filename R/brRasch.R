@@ -117,11 +117,11 @@ brRasch <- function(data,
     }
 
     gradfun <- function(pars, fit = NULL, constrained = rep(FALSE, npar),
-                        restricted = rep(FALSE, npar), all = FALSE, ...) {
+                        restricted = rep(FALSE, npar), all_elements = FALSE, ...) {
         if (is.null(fit)) {
             fit <- fitfun(pars, ...)
         }
-        if (all) {
+        if (all_elements) {
             inds <- !xor(constrained, restricted)
         }
         else {
@@ -155,9 +155,9 @@ brRasch <- function(data,
                 Vsqrts <- Matrix::Diagonal(I)*Vsqrt[s, ]
                 gammass <- gammas[,s]
                 ele <- Matrix::Matrix(unitvector(S, s), ncol = 1)
-                fisherSqrt <- Matrix::rbind(Vsqrts,
-                                            Matrix::kronecker(Vsqrts, gammass),
-                                            Matrix::kronecker(ele, betas %*% Vsqrts))
+                fisherSqrt <- rbind(Vsqrts,
+                                    Matrix::kronecker(Vsqrts, gammass),
+                                    Matrix::kronecker(ele, betas %*% Vsqrts))
                 fisherInfo <- fisherInfo + Matrix::tcrossprod(fisherSqrt)
             }
             inds <- !xor(constrained, restricted)
@@ -220,9 +220,9 @@ brRasch <- function(data,
                 Da <- Matrix::Matrix(0, nrow = I, ncol = S)
                 Da[i, ] <- Vsqrti
                 ele <- Matrix::Matrix(unitvector(I, i), ncol = 1)
-                fisherSqrt <- Matrix::rbind(Da,
-                                            Matrix::kronecker(ele, gammas %*% dVsqrti),
-                                            Matrix::kronecker(dVsqrti, betasi))
+                fisherSqrt <- rbind(Da,
+                                    Matrix::kronecker(ele, gammas %*% dVsqrti),
+                                    Matrix::kronecker(dVsqrti, betasi))
                 fisherInfo <- fisherInfo + Matrix::tcrossprod(fisherSqrt)
             }
             inds <- !xor(constrained, restricted)
@@ -304,7 +304,7 @@ brRasch <- function(data,
 
     ## The first-order bias function
     adjustmentfun <- function(pars, fit = NULL, vcov, constrained = rep(FALSE, npar),
-                              restricted = rep(FALSE, npar), all = FALSE, ...) {
+                              restricted = rep(FALSE, npar), all_elements = FALSE, ...) {
         if (is.null(fit)) {
             fit <- fitfun(pars, ...)
         }
@@ -315,7 +315,7 @@ brRasch <- function(data,
         inds <- !xor(constrained, restricted)
         vcovExt[inds, inds] <- vcov
         hatv <- hats(par, fit = fit, vcov = vcov, constrained = constrained, restricted = restricted)
-        if (all) {
+        if (all_elements) {
             jac <- predictorJacobian(par, fit = fit, constrained = constrained, restricted = restricted)
         }
         else {
@@ -644,7 +644,7 @@ brRasch <- function(data,
     fit <- fitfun(par)
 
     inds <- !xor(constrained, restricted)
-    score <- gradfun(par, fit = fit, constrained = constrained, restricted = restricted, all = TRUE)
+    score <- gradfun(par, fit = fit, constrained = constrained, restricted = restricted, all_elements = TRUE)
     vcov <- try(hessfun(par, fit = fit, constrained = constrained, restricted = restricted,
                         inverse = TRUE, ridge = 0), silent = TRUE)
     if (inherits(vcov, "try-error")) {
@@ -655,7 +655,7 @@ brRasch <- function(data,
     }
     else {
         if (br) {
-            score <- score + adjustmentfun(par, fit = fit, vcov = vcov, constrained = constrained, restricted = restricted, all = TRUE)
+            score <- score + adjustmentfun(par, fit = fit, vcov = vcov, constrained = constrained, restricted = restricted, all_elements = TRUE)
         }
     }
 
