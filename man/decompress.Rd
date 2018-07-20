@@ -12,4 +12,3 @@ decompress(obj, ...)
 \description{
 \link{compress} finds the unique rows of a matrix and returns those along with the respective weight matrix.
 }
-

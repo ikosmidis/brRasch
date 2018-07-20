@@ -18,4 +18,3 @@ an object of class compressed.
 \details{
 asdjasdjkfhlksdjhflas
 }
-

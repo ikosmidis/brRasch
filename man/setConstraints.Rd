@@ -2,8 +2,19 @@
 % Please edit documentation in R/setConstraints.R
 \name{setConstraints}
 \alias{setConstraints}
-\title{Set and check constraints for the parameters of a model}
+\title{Set and check identifiability constraints for the parameters of a model}
 \usage{
 setConstraints(nconstraints, parnames, which, values)
 }
+\arguments{
+\item{nconstraints}{positive integer. It indicates the smallest number of constraints required for indefiability}
 
+\item{parnames}{the names of the model parameters}
+
+\item{which}{a vector of integers indicating which parameters are to be constrained}
+
+\item{values}{a vector with elements the values at which the parameters in \code{which} should be constrained}
+}
+\description{
+'setConstraints' is a helper function that acts as a simple interface to set constraints for some of the parameters of a model.
+}

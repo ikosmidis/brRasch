@@ -4,7 +4,7 @@
 \alias{setConstraintsRasch}
 \title{Set and check constraints for the parameters of IRT models}
 \usage{
-setConstraintsRasch(data, dim, which, values)
+setConstraintsRasch(data, dim, which, values, restricted)
 }
 \arguments{
 \item{data}{a matrix of counts or an object of class \link{compressed}. If a matrix of counts is inputted then the rows must correspond to subjects and the columns to items.}
@@ -68,26 +68,9 @@ constrc0 <- setConstraintsRasch(data = lsatCompressed$data,
 # Fit the 2PL model under those constraints.
 fitML0 <- brRasch(lsatCompressed, constraints = constrc0, br = FALSE)
 
-# Crosscheck that the fit is right by comparing with glm
-lsatLong <- reshape(lsatCompressed$data, direction = "long",
-                    varying = names(lsatCompressed$data),
-                    v.names = "y", timevar = "item", idvar = "subject")
-lsatLong$w <- reshape(lsatCompressed$weights, direction = "long",
-                      varying = names(lsatCompressed$data),
-                      v.names = "w", timevar = "item", idvar = "subject")$w
-lsatLong <- within(lsatLong, {
-                   item <- factor(item)
-                   subject <- factor(subject) })
-fitML0glm <- glm(y ~ -1 + subject + item, weights = w, family = binomial, data = lsatLong)
-
-# The coefficients are numerically the same
-coef(fitML0)
-coef(fitML0glm)
-
 \dontrun{
 # The IRFs for fitML0 have the same slope
 irf(fitML0)
 }
 
 }
-

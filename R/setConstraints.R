@@ -115,7 +115,7 @@ setConstraintsRasch <- function(data, dim, which, values, restricted) {
         out$restricted <- rep(FALSE, nvar)
     }
     else {
-        if (!(restricted %in% which)) {
+        if (!all(restricted %in% which)) {
             stop("`restricted` is not a subset of `which`")
         }
         else {

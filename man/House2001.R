@@ -22,6 +22,8 @@ fitBRHouse2001 <- brRasch(House2001m, constraints = constr, br = TRUE, dim = 1, 
 
 ## Check solution against brglm2
 House_1PL <- brRasch(House2001m, br = TRUE, dim = 0, trace = 1)
+House_2PL <- brRasch(House2001m, br = TRUE, constraints = constr, dim = 1, trace = 1)
+
 aa <- stack(as.data.frame(House2001m))
 names(aa) <- c("response", "rollcall")
 aa$member <- rownames(House2001m)

@@ -341,6 +341,7 @@ brRasch <- function(data,
         data <- as.matrix(weights*data$data)
     }
     else {
+
         ## Binomial data and weights
         data <- as.matrix(data)
         if (missing(weights)) {
@@ -387,6 +388,7 @@ brRasch <- function(data,
 
     ## Handle NA entries
     naInd <- is.na(data)
+
     data[naInd] <- 0
     weights[naInd] <- 0
 
