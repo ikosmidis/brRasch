@@ -11,17 +11,14 @@ set.seed(26032015)
 
 nsimu <- 500
 
-I <- 5
-dim <- 1
+I <- 10
+S <- 100
+tots <- 1
+
 alphas <- c(0, runif(I - 1))
 betas <- rep(1, I)
-
-
 gammasPool <- c(rnorm(10000, 0, 0.5), rnorm(10000, 3, 0.5))
 gammasPool <- rnorm(20000, 0, 0.5)
-
-S <- 100
-tots <- 2
 
 gammas <- truepar <- as.list(numeric(length(Ss)))
 
@@ -53,12 +50,12 @@ testsBR <- alply(.data = seq.int(nsimu), .margin = 1, .fun = function(j) {
                    fsmaxit = 1,
                    fstol = 1e-05)
     test_score <- test2PL(out, type = "score")
-    test_wald <- test2PL(out, type = "Wald")
+    ## test_wald <- test2PL(out, type = "Wald")
         cat(S, "subjects", "\n")
     cat("Sample:", j, "\n")
     cat("Maximum |score| in restricted fit", max(abs(test_score$scores)), "\n")
-    c(pvalue_score = test_score$pvalue,
-      pvalue_wald = test_wald$pvalue)
+    c(pvalue_score = test_score$pvalue)
+      ## pvalue_wald = test_wald$pvalue)
 }, .parallel = TRUE)
 
 
