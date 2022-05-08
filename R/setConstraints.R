@@ -35,6 +35,7 @@ setConstraints <- function(nconstraints,
     }
     if (!missing(which) & !missing(values)) {
         constrained <- rep(FALSE, length(parnames))
+        names(constrained) <- parnames
         constrained[which] <- TRUE
         ## Ensure that if which is not ordered the constrainTo is ordered!
         constrainTo <- values[order(which)]
@@ -123,6 +124,7 @@ setConstraintsRasch <- function(data, dim, which, values, restricted) {
             out$restricted[restricted] <- TRUE
         }
     }
+    names(out$restricted) <- names(out$constrained)
     out$dim <- dim
     out
 }

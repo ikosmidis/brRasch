@@ -149,7 +149,7 @@ brRasch <- function(data,
             fit <- fitfun(pars, ...)
         }
         with(fit, {
-            Vsqrt <- sqrt(weights*probs*(1 - probs))
+            Vsqrt <- sqrt(weights * probs * (1 - probs))
             fisherInfo <- 0
             for (s in Sinds) {
                 Vsqrts <- Matrix::Diagonal(I)*Vsqrt[s, ]
@@ -162,7 +162,7 @@ brRasch <- function(data,
             }
             inds <- !xor(constrained, restricted)
             fisherInfo <- (fisherInfo + penobj$hessfun)[inds, inds]
-            if (inverse) solve(fisherInfo + ridge*Matrix::Diagonal(enpar + sum(restricted))) else fisherInfo
+            if (inverse) solve(fisherInfo + ridge * Matrix::Diagonal(enpar + sum(restricted))) else fisherInfo
         })
     }
 
@@ -535,13 +535,13 @@ brRasch <- function(data,
                                            ## on the step?
 
             ## Ad hoc rules for speeding up if close to a solution
-            if (max(abs(step)) < 1) {
-                stepFactor <- 1
-                fsridgeC <- 0
-            }
-            else {
-                fsridgeC <- fsridge
-            }
+
+            ## if (max(abs(step)) < 0.05) {
+            ##      fsridgeC <- fsridge * max(abs(step))
+            ## }
+            ## else {
+            ##     fsridgeC <- fsridge
+            ## }
 
             testhalf <- TRUE
 
@@ -551,6 +551,8 @@ brRasch <- function(data,
             while (testhalf & stepFactor < 15) {
 
                 fit <- fitfun(par)
+
+                fsridgeC <- min(fsridge, fsridge * max(abs(step)))
 
                 loglikv <- loglik(par, fit = fit)
 
@@ -580,9 +582,11 @@ brRasch <- function(data,
                 ## in order to use it for the calculation of the
                 ## adjustment
                 if (br) {
+
                     vcov <- try(hessfun(par, fit = fit,
                                         constrained = constrained, restricted = restricted,
                                         inverse = TRUE, ridge = 0), silent = TRUE)
+                    ## vcov <- hessInv
                     if (inherits(vcov, "try-error")) {
                         adjustment <- rep.int(NA_real_, npar)[!constrained]
                     }
@@ -624,6 +628,7 @@ brRasch <- function(data,
             ## }
 
             if (trace) {
+
                 traceFun()
             }
             if (failedInv | failedAdj | (all(abs(step) < fstol))) {
